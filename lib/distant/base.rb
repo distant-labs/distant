@@ -18,6 +18,14 @@ module Distant
       self.class.connection
     end
 
+    def has_many?(plural)
+      self.class.has_many_rels.include? plural.to_sym
+    end
+
+    def belongs_to?(singular)
+      self.class.belongs_to_rels.include? singular.to_sym
+    end
+
     module ClassMethods
       def init_class_vars
         @has_many = [ ]
@@ -26,6 +34,14 @@ module Distant
 
       def connection
         @@connection ||= Distant::Connection.new( Distant.config )
+      end
+
+      def has_many_rels
+        @has_many
+      end
+
+      def belongs_to_rels
+        @belongs_to
       end
 
       def marshal(data)
@@ -56,14 +72,6 @@ module Distant
           class_ref = Kernel.const_get self.class.to_s.deconstantize + '::' + plural.to_s.singularize.classify
           response_data.map{ |item| class_ref.marshal(item) }
         end
-      end
-
-      def has_many?(plural)
-        @has_many.include? plural.to_sym
-      end
-
-      def belongs_to?(singular)
-        @belongs_to.include? singular.to_sym
       end
 
       def belongs_to(singular, route)

@@ -228,12 +228,12 @@ describe Distant::Base do
     context 'when the thing' do
       context 'does have many other_things' do
         it 'returns true' do
-          expect(Distant::BaseTest.has_many?(:sub_tests)).to be_truthy
+          expect(Distant::BaseTest.new.has_many?(:sub_tests)).to be_truthy
         end
       end
       context 'does not have many other_things' do
         it 'returns false' do
-          expect(Distant::BaseTest.has_many?(:sdf987sd98f7)).to be_falsey
+          expect(Distant::BaseTest.new.has_many?(:sdf987sd98f7)).to be_falsey
         end
       end
     end
@@ -243,12 +243,12 @@ describe Distant::Base do
     context 'when the thing' do
       context 'does belong to other_thing' do
         it 'returns true' do
-          expect(Distant::SubTest.belongs_to?(:base_test)).to be_truthy
+          expect(Distant::SubTest.new.belongs_to?(:base_test)).to be_truthy
         end
       end
       context 'does not have many other_things' do
         it 'returns false' do
-          expect(Distant::SubTest.belongs_to?(:kjh234kjh23kj4h)).to be_falsey
+          expect(Distant::SubTest.new.belongs_to?(:kjh234kjh23kj4h)).to be_falsey
         end
       end
     end
