@@ -1,12 +1,13 @@
 
 module Distant
   class Config
-    attr_accessor :base_uri, :auth_header_generator, :default_header_generator
+    attr_accessor :base_uri, :debug, :auth_header_generator, :default_header_generator
 
     def initialize
       # Default just returns an empty hash:
       self.auth_header_generator = Proc.new{ {} }
       self.default_header_generator = Proc.new{ {} }
+      self.debug = false
     end
 
     def set_authentication_headers_with(&block)

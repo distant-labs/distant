@@ -88,7 +88,7 @@ describe Distant::Base do
     context 'when called' do
       context 'the first time' do
         before do
-          expect(Distant::Connection).to receive(:new).exactly(1).times
+          expect(Distant::Connection).to receive(:configure).exactly(1).times
         end
         it 'returns a new Distant::Connection' do
           Distant::BaseTest.connection
@@ -96,7 +96,7 @@ describe Distant::Base do
       end
       context 'subsequent times' do
         before do
-          expect(Distant::Connection).to receive(:new).exactly(1).times.and_call_original
+          expect(Distant::Connection).to receive(:configure).exactly(1).times.and_call_original
         end
         it 'returns the same Distant::Connection' do
           first_connection = Distant::BaseTest.connection
@@ -121,7 +121,7 @@ describe Distant::Base do
         expect(Distant::BaseTest).to receive(:preprocess_response){ [{id: 123}] }
       end
       it 'makes a GET request with the correct route' do
-        expect_any_instance_of(Distant::Connection).to receive(:get).with(@route, {})
+        expect(Distant::Connection).to receive(:get).with(@route, {})
         # Finally:
         Distant::BaseTest.all
       end
@@ -131,7 +131,7 @@ describe Distant::Base do
         expect(Distant::BaseTest).to receive(:preprocess_response){ {id: 123} }
       end
       it 'makes a GET request with the correct route' do
-        expect_any_instance_of(Distant::Connection).to receive(:get).with(@single_route.gsub(':id', '123'), {})
+        expect(Distant::Connection).to receive(:get).with(@single_route.gsub(':id', '123'), {})
         # Finally:
         Distant::BaseTest.find(id: 123)
       end
@@ -151,7 +151,7 @@ describe Distant::Base do
         expect(Distant::BaseTest).to receive(:preprocess_response){ [{base_test_id: 123, id: 456}]}
       end
       it 'makes a GET request with the correct route' do
-        expect_any_instance_of(Distant::Connection).to receive(:get).with('/base/123/tests', {})
+        expect(Distant::Connection).to receive(:get).with('/base/123/tests', {})
         result = Distant::BaseTest.new(id: 123).sub_tests
         expect(result.first).to be_a Distant::SubTest
       end
@@ -171,7 +171,7 @@ describe Distant::Base do
         expect(Distant::SubTest).to receive(:preprocess_response){ {id: 123, name: 'foo'}}
       end
       it 'makes a GET request with the correct route' do
-        expect_any_instance_of(Distant::Connection).to receive(:get).with('/base/123', {})
+        expect(Distant::Connection).to receive(:get).with('/base/123', {})
         result = Distant::SubTest.new(id: 456, base_test_id: 123).base_test
         expect(result).to be_a Distant::BaseTest
       end
@@ -196,19 +196,33 @@ describe Distant::Base do
         end
         context 'and the response' do
           context 'is valid JSON' do
-            before do
-              @response_data = [
-                {id: 123, name: 'Test'},
-                {fooId: 456, nickName: 'Testy McTesterson'}
-              ]
-              @expected_data = [
-                {id: 123, name: 'Test'},
-                {foo_id: 456, nick_name: 'Testy McTesterson'}
-              ]
-              expect(@response).to receive(:body){ @response_data.to_json }
-            end
-            it 'returns the parsed JSON response' do
-              expect(Distant::BaseTest.preprocess_response(@response)).to eq @expected_data
+            context 'in the form of' do
+              context 'an Array of Objects' do
+                before do
+                  @response_data = [
+                    {id: 123, name: 'Test'},
+                    {fooId: 456, nickName: 'Testy McTesterson'}
+                  ]
+                  @expected_data = [
+                    {id: 123, name: 'Test'},
+                    {foo_id: 456, nick_name: 'Testy McTesterson'}
+                  ]
+                  expect(@response).to receive(:body){ @response_data.to_json }
+                end
+                it 'returns the parsed JSON response' do
+                  expect(Distant::BaseTest.preprocess_response(@response)).to eq @expected_data
+                end
+              end
+              context 'an Object' do
+                before do
+                  @response_data = {fooId: 456, nickName: 'Testy McTesterson'}
+                  @expected_data = {foo_id: 456, nick_name: 'Testy McTesterson'}
+                  expect(@response).to receive(:body){ @response_data.to_json }
+                end
+                it 'returns the parsed JSON response' do
+                  expect(Distant::BaseTest.preprocess_response(@response)).to eq @expected_data
+                end
+              end
             end
           end
           context 'is not valid JSON' do

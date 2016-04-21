@@ -3,11 +3,13 @@ module Distant
   class Connection
     include HTTParty
 
-    attr_accessor :config
-    def initialize(config)
+    def self.configure(config)
       raise ArgumentError.new 'invalid config' unless config.is_a? Distant::Config
-      self.config = config
-      self.class.base_uri config.base_uri
+      self.base_uri config.base_uri
+      if config.debug
+        self.debug_output
+      end
+      self
     end
   end
 end

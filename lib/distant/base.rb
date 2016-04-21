@@ -33,7 +33,7 @@ module Distant
       end
 
       def connection
-        @@connection ||= Distant::Connection.new( Distant.config )
+        @@connection ||= Distant::Connection.configure( Distant.config )
       end
 
       def has_many_rels
@@ -111,7 +111,7 @@ module Distant
           parsed = JSON.parse(response.body, symbolize_names: true)
           parsed.is_a?(Array) ?
             parsed.map{ |item| translator.translate_from_hash(item) }
-            : translator.translate_from_hash(item)
+            : translator.translate_from_hash(parsed)
         else
           raise Distant::ApiError.new response
         end
