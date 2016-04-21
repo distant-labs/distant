@@ -5,6 +5,7 @@ require 'httparty'
 require 'logger'
 require 'ostruct'
 require 'distant/config'
+require 'distant/translator'
 require 'distant/base'
 require 'distant/connection'
 

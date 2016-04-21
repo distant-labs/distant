@@ -85,26 +85,21 @@ module Distant
         case response.code
         when 200..299
           parsed = JSON.parse(response.body, symbolize_names: true)
-          recursive_underscore(parsed)
+          parsed.is_a?(Array) ?
+            parsed.map{ |item| translator.translate_from_hash(item) }
+            : translator.translate_from_hash(item)
         else
           raise Distant::ApiError.new response
         end
       end
 
-      private
+      def translator
+        @translator
+      end
 
-      def recursive_underscore(thing)
-        if thing.is_a? Hash
-          out = {}
-          thing.each do |key, val|
-            out[key.to_s.underscore.to_sym] = recursive_underscore(val)
-          end
-          out
-        elsif thing.is_a? Array
-          thing.map{ |item| recursive_underscore(item) }
-        else
-          thing
-        end
+      def translate(&block)
+        @translator = Distant::Translator.new
+        translator.instance_eval(&block)
       end
     end
 

@@ -7,9 +7,22 @@ describe Distant::Base do
     end
     class Distant::BaseTest < Distant::Base
       attr_accessor :id, :name
-
       has_many :sub_tests, '/base/tests/:id/sub_tests'
+
+      translate do
+        from_hash do |hash|
+          recursive_underscore(hash)
+        end
+        to_hash do |obj|
+          {
+            id: obj.id,
+            fooId: obj.foo_id,
+          }
+        end
+      end
+
     end
+
     class Distant::SubTest < Distant::Base
       attr_accessor :id, :base_test_id
       belongs_to :base_test, ''
