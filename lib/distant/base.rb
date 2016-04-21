@@ -30,6 +30,7 @@ module Distant
       def init_class_vars
         @has_many = [ ]
         @belongs_to = [ ]
+        @translator = Distant::Translator.new
       end
 
       def connection
@@ -50,7 +51,8 @@ module Distant
 
       def get(name, route)
         define_singleton_method(name) do |*args|
-          path = path_closure_generator(route).call(*args)
+          path_generator, captures = self.path_closure_generator(route)
+          path = path_generator.call(*args)
           headers = Distant.config.default_headers('')
                       .merge(Distant.config.auth_headers(''))
           response_data = preprocess_response connection.get(path, headers: headers)
@@ -65,7 +67,9 @@ module Distant
       def has_many(plural, route)
         @has_many << plural.to_sym
         define_method(plural) do
-          path = self.class.path_closure_generator(route).call(id: self.id)
+          path_generator, captures = self.class.path_closure_generator(route)
+          path_args = captures.map{|x| {x.to_sym => send(x)}}.reduce({}, :merge)
+          path = path_generator.call(path_args)
           headers = Distant.config.default_headers('')
                       .merge(Distant.config.auth_headers(''))
           class_ref = Kernel.const_get self.class.to_s.deconstantize + '::' + plural.to_s.singularize.classify
@@ -79,7 +83,9 @@ module Distant
         define_method(singular) do
           foreign_key_attr = singular.to_s + '_id'
           foreign_key_value = self.send(foreign_key_attr)
-          path = self.class.path_closure_generator(route).call(id: foreign_key_value)
+          path_generator, captures = self.class.path_closure_generator(route)
+          path_args = captures.map{|x| {x.to_sym => send(x)}}.reduce({}, :merge)
+          path = path_generator.call(id: foreign_key_value)
           headers = Distant.config.default_headers('')
                       .merge(Distant.config.auth_headers(''))
           class_ref = Kernel.const_get self.class.to_s.deconstantize + '::' + singular.to_s.classify
@@ -96,13 +102,15 @@ module Distant
         template = route.gsub(%r{:([^/\{\}\:\-]+)}, "%{#{$1}}")
 
         # Convert '/foo/%{bar}/%{bux}' to /foo/123/456 with {bar: 123, bux: 456}
-        class_eval <<-EOF
+        proc = class_eval <<-EOF
           Proc.new do |#{captures.map{|cap| "#{cap}:"}.join(', ')}|
             template % {
               #{captures.map{ |cap| cap + ": " + cap }.join(', ')}
             }
           end
         EOF
+
+        return proc, captures
       end
 
       def preprocess_response(response)

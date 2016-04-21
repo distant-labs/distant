@@ -36,7 +36,7 @@ describe Distant::Base do
         end
         context 'the closure returned' do
           before do
-            @closure = Distant::BaseTest.path_closure_generator(@route)
+            @closure, @captures = Distant::BaseTest.path_closure_generator(@route)
           end
           it 'accepts no arguments' do
             expect{@closure.call()}.not_to raise_error
@@ -49,7 +49,7 @@ describe Distant::Base do
         end
         context 'the closure returned' do
           before do
-            @closure = Distant::BaseTest.path_closure_generator(@route)
+            @closure, @captures = Distant::BaseTest.path_closure_generator(@route)
           end
           it 'accepts one corresponding argument' do
             expect{@closure.call(id: 123)}.not_to raise_error
@@ -63,7 +63,7 @@ describe Distant::Base do
         end
         context 'the closure returned' do
           before do
-            @closure = Distant::BaseTest.path_closure_generator(@route)
+            @closure, @captures = Distant::BaseTest.path_closure_generator(@route)
           end
           it 'accepts all corresponding arguments' do
             expect{@closure.call(id: 123, bar_id: 456)}.not_to raise_error
@@ -147,11 +147,13 @@ describe Distant::Base do
       expect(Distant::BaseTest.new).to respond_to :sub_tests
     end
     context 'when the plural instance method is called' do
-      before do
-        expect(Distant::BaseTest).to receive(:preprocess_response){ [{base_test_id: 123, id: 456}]}
-      end
       it 'makes a GET request with the correct route' do
-        expect(Distant::Connection).to receive(:get).with('/base/123/tests', headers: {})
+        expect(Distant::Connection).to receive(:get).with('/base/123/tests', headers: {}) do
+          response = double('response')
+          expect(response).to receive(:code){ 200 }
+          expect(response).to receive(:body){ [{base_test_id: 123, id: 456}].to_json }
+          response
+        end
         result = Distant::BaseTest.new(id: 123).sub_tests
         expect(result.first).to be_a Distant::SubTest
       end
@@ -167,11 +169,13 @@ describe Distant::Base do
       expect(Distant::SubTest.new).to respond_to :base_test
     end
     context 'when the  instance method is called' do
-      before do
-        expect(Distant::SubTest).to receive(:preprocess_response){ {id: 123, name: 'foo'}}
-      end
       it 'makes a GET request with the correct route' do
-        expect(Distant::Connection).to receive(:get).with('/base/123', headers: {})
+        expect(Distant::Connection).to receive(:get).with('/base/123', headers: {}) do
+          response = double('response')
+          expect(response).to receive(:code){ 200 }
+          expect(response).to receive(:body){ {id: 123, name: 'test'}.to_json }
+          response
+        end
         result = Distant::SubTest.new(id: 456, base_test_id: 123).base_test
         expect(result).to be_a Distant::BaseTest
       end
