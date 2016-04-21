@@ -121,7 +121,7 @@ describe Distant::Base do
         expect(Distant::BaseTest).to receive(:preprocess_response){ [{id: 123}] }
       end
       it 'makes a GET request with the correct route' do
-        expect(Distant::Connection).to receive(:get).with(@route, {})
+        expect(Distant::Connection).to receive(:get).with(@route, headers: {})
         # Finally:
         Distant::BaseTest.all
       end
@@ -131,7 +131,7 @@ describe Distant::Base do
         expect(Distant::BaseTest).to receive(:preprocess_response){ {id: 123} }
       end
       it 'makes a GET request with the correct route' do
-        expect(Distant::Connection).to receive(:get).with(@single_route.gsub(':id', '123'), {})
+        expect(Distant::Connection).to receive(:get).with(@single_route.gsub(':id', '123'), headers: {})
         # Finally:
         Distant::BaseTest.find(id: 123)
       end
@@ -151,7 +151,7 @@ describe Distant::Base do
         expect(Distant::BaseTest).to receive(:preprocess_response){ [{base_test_id: 123, id: 456}]}
       end
       it 'makes a GET request with the correct route' do
-        expect(Distant::Connection).to receive(:get).with('/base/123/tests', {})
+        expect(Distant::Connection).to receive(:get).with('/base/123/tests', headers: {})
         result = Distant::BaseTest.new(id: 123).sub_tests
         expect(result.first).to be_a Distant::SubTest
       end
@@ -171,7 +171,7 @@ describe Distant::Base do
         expect(Distant::SubTest).to receive(:preprocess_response){ {id: 123, name: 'foo'}}
       end
       it 'makes a GET request with the correct route' do
-        expect(Distant::Connection).to receive(:get).with('/base/123', {})
+        expect(Distant::Connection).to receive(:get).with('/base/123', headers: {})
         result = Distant::SubTest.new(id: 456, base_test_id: 123).base_test
         expect(result).to be_a Distant::BaseTest
       end

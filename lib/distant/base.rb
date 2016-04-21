@@ -53,7 +53,7 @@ module Distant
           path = path_closure_generator(route).call(*args)
           headers = Distant.config.default_headers('')
                       .merge(Distant.config.auth_headers(''))
-          response_data = preprocess_response connection.get(path, headers)
+          response_data = preprocess_response connection.get(path, headers: headers)
           if response_data.is_a? Array
             response_data.map{ |item| marshal(item) }
           else
@@ -68,7 +68,7 @@ module Distant
           path = self.class.path_closure_generator(route).call(id: self.id)
           headers = Distant.config.default_headers('')
                       .merge(Distant.config.auth_headers(''))
-          response_data = self.class.preprocess_response connection.get(path, headers)
+          response_data = self.class.preprocess_response connection.get(path, headers: headers)
           class_ref = Kernel.const_get self.class.to_s.deconstantize + '::' + plural.to_s.singularize.classify
           response_data.map{ |item| class_ref.marshal(item) }
         end
@@ -82,7 +82,7 @@ module Distant
           path = self.class.path_closure_generator(route).call(id: foreign_key_value)
           headers = Distant.config.default_headers('')
                       .merge(Distant.config.auth_headers(''))
-          response_data = self.class.preprocess_response connection.get(path, headers)
+          response_data = self.class.preprocess_response connection.get(path, headers: headers)
           class_ref = Kernel.const_get self.class.to_s.deconstantize + '::' + singular.to_s.classify
           class_ref.marshal(response_data)
         end
