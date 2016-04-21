@@ -11,6 +11,7 @@ module Distant
 
     def self.inherited(klass)
       klass.extend(ClassMethods)
+      klass.init_class_vars
     end
 
     def connection
@@ -18,6 +19,11 @@ module Distant
     end
 
     module ClassMethods
+      def init_class_vars
+        @has_many = [ ]
+        @belongs_to = [ ]
+      end
+
       def connection
         @@connection ||= Distant::Connection.new( Distant.config )
       end
@@ -41,6 +47,7 @@ module Distant
       end
 
       def has_many(plural, route)
+        @has_many << plural.to_sym
         define_method(plural) do
           path = self.class.path_closure_generator(route).call(id: self.id)
           headers = Distant.config.default_headers('')
@@ -51,7 +58,16 @@ module Distant
         end
       end
 
+      def has_many?(plural)
+        @has_many.include? plural.to_sym
+      end
+
+      def belongs_to?(singular)
+        @belongs_to.include? singular.to_sym
+      end
+
       def belongs_to(singular, route)
+        @belongs_to << singular.to_sym
         define_method(singular) do
           foreign_key_attr = singular.to_s + '_id'
           foreign_key_value = self.send(foreign_key_attr)
