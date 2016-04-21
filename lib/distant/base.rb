@@ -85,7 +85,7 @@ module Distant
           foreign_key_value = self.send(foreign_key_attr)
           path_generator, captures = self.class.path_closure_generator(route)
           path_args = captures.map{|x| {x.to_sym => send(x)}}.reduce({}, :merge)
-          path = path_generator.call(id: foreign_key_value)
+          path = path_generator.call(path_args)
           headers = Distant.config.default_headers('')
                       .merge(Distant.config.auth_headers(''))
           class_ref = Kernel.const_get self.class.to_s.deconstantize + '::' + singular.to_s.classify

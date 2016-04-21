@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name        = 'distant'
-  spec.version     = '0.1.7'
+  spec.version     = '0.1.8'
   spec.authors     = ['John Drago']
   spec.email       = 'jdrago.999@gmail.com'
   spec.homepage    = 'https://github.com/distant/distant'

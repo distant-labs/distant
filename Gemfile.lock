@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    distant (0.1.7)
+    distant (0.1.8)
       activesupport
       httparty
 
