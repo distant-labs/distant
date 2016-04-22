@@ -1,9 +1,9 @@
 Gem::Specification.new do |spec|
   spec.name        = 'distant'
-  spec.version     = '0.1.8'
+  spec.version     = '0.1.9'
   spec.authors     = ['John Drago']
   spec.email       = 'jdrago.999@gmail.com'
-  spec.homepage    = 'https://github.com/distant/distant'
+  spec.homepage    = 'https://github.com/distant-labs/distant'
   spec.summary     = 'Distant API Client'
   spec.description = 'Distant API Client'
   spec.required_rubygems_version = '>= 1.3.6'

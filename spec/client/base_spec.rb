@@ -25,7 +25,6 @@ describe Distant::Base do
 
     class Distant::SubTest < Distant::Base
       attr_accessor :id, :base_test_id
-      belongs_to :base_test, '/base/tests/:base_test_id'
     end
   end
   describe '.path_closure_generator(route)' do
@@ -164,6 +163,10 @@ describe Distant::Base do
     before do
       @route = '/base/:base_test_id'
       Distant::SubTest.belongs_to :base_test, @route
+    end
+    context 'rspec matcher' do
+      let(:subject){ Distant::SubTest.new }
+      it { should belong_to :base_test }
     end
     it 'creates an instance method named after the plural collection' do
       expect(Distant::SubTest.new).to respond_to :base_test
